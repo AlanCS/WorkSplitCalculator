@@ -1,0 +1,7 @@
+﻿[
+  {
+    "Namespace": "aws:elasticbeanstalk:application",
+    "OptionName": "Application Healthcheck URL",
+    "Value": "/healthcheck"
+  }
+]

@@ -27,6 +27,8 @@ namespace WorkSplitCalculator.Server.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            logger.LogWarning("stuff");
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

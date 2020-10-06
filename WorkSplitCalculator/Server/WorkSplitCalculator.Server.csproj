@@ -5,12 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWS.Logger.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Client\WorkSplitCalculator.Client.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\Shared\WorkSplitCalculator.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include=".ebextensions\healthcheckurl.json" />
   </ItemGroup>
 
 

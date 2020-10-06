@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkSplitCalculator.Server", "WorkSplitCalculator\Server\WorkSplitCalculator.Server.csproj", "{8B31350F-97A1-495D-880B-54CC6C7C7B7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkSplitCalculator.Server", "WorkSplitCalculator\Server\WorkSplitCalculator.Server.csproj", "{8B31350F-97A1-495D-880B-54CC6C7C7B7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkSplitCalculator.Client", "WorkSplitCalculator\Client\WorkSplitCalculator.Client.csproj", "{0BF7DBFD-F480-4762-B121-911EEBB14F65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkSplitCalculator.Client", "WorkSplitCalculator\Client\WorkSplitCalculator.Client.csproj", "{0BF7DBFD-F480-4762-B121-911EEBB14F65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkSplitCalculator.Shared", "WorkSplitCalculator\Shared\WorkSplitCalculator.Shared.csproj", "{42917B88-63E5-4671-97DC-8F82366996F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkSplitCalculator.Shared", "WorkSplitCalculator\Shared\WorkSplitCalculator.Shared.csproj", "{42917B88-63E5-4671-97DC-8F82366996F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "WorkSplitCalculator\Infrastructure\Infrastructure.csproj", "{78905289-25CA-464F-9B1F-FCEAA4636F4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{42917B88-63E5-4671-97DC-8F82366996F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42917B88-63E5-4671-97DC-8F82366996F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42917B88-63E5-4671-97DC-8F82366996F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78905289-25CA-464F-9B1F-FCEAA4636F4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78905289-25CA-464F-9B1F-FCEAA4636F4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78905289-25CA-464F-9B1F-FCEAA4636F4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78905289-25CA-464F-9B1F-FCEAA4636F4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
