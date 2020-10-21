@@ -1,0 +1,3 @@
+{
+  "app": "dotnet publish -c Release src"
+}
