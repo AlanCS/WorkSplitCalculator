@@ -8,7 +8,7 @@ Both the CDK app and the Lambda handler are written in C# and built using the `d
 In this project, `Program.cs` is the main entry point of the CDK app and the CDK construct
 for the lambda function is configured in `CapitalizeStringStack.cs`.
 
-The lambda function is another csharp project residing within the `CapitalizeStringHandler`
+The lambda function is another csharp project residing within the `Web`
 folder.
 
 ## Build & Deploy
@@ -16,7 +16,7 @@ folder.
 Build -
 
 ```shell
-cd CapitalizeStringHandler/src/CapitalizeStringHandler
+cd Web/src/Web
 dotnet build
 dotnet tool install -g Amazon.Lambda.Tools # if not already
 dotnet lambda package
