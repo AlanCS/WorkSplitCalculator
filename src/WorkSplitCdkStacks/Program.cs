@@ -1,7 +1,8 @@
 ﻿using Amazon.CDK;
 using System.Data;
+using WorkSplitCdkStacks;
 
-namespace CdkStack
+namespace WorkSplitCdkStacks
 {
     sealed class Program
     {

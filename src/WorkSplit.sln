@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CdkStack", "CdkStack\CdkStack.csproj", "{4064FB02-4B4F-4389-B679-0E67CD327D7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkSplitCdkStacks", "WorkSplitCdkStacks\WorkSplitCdkStacks.csproj", "{4064FB02-4B4F-4389-B679-0E67CD327D7C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "Web\Web.csproj", "{7C2B9337-0261-4124-A059-072A25EE1B03}"
 EndProject

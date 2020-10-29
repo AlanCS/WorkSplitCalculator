@@ -1,16 +1,17 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.Lambda;
-using CdkStack.Helpers;
+using WorkSplitCdkStacks.Helpers;
 using System;
 
-namespace CdkStack
+namespace WorkSplitCdkStacks
 {
     public class InfrastructureStack : Stack
     {
         internal InfrastructureStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
-            Console.WriteLine($"Creating stack for region [{this.Region}] and account [{this.Account}]");
+            var stackIdentifier = $"stack [{StackName}] for region [{Region}] and account [{Account}]";
+            Console.WriteLine($"Starting stack {stackIdentifier}");
 
             var dotnetWebApiLambda = new Function(this, "WebLambda", new FunctionProps
             {
@@ -30,7 +31,7 @@ namespace CdkStack
                 SiteSubDomain = "www",
                 WebsiteFilesPath = "temp/Client/wwwroot"
             });
-
+            Console.WriteLine($"Completed stack {stackIdentifier}");
         }
     }
 }

@@ -7,7 +7,7 @@ using Amazon.CDK.AWS.CloudFront;
 using System.Linq;
 using Amazon.CDK.AWS.Route53.Targets;
 
-namespace CdkStack.Helpers
+namespace WorkSplitCdkStacks.Helpers
 {
     // copied and adapted from https://github.com/aws-samples/aws-cdk-examples/blob/master/csharp/static-site/src/StaticSite/StaticSiteConstruct.cs
 
@@ -23,20 +23,15 @@ namespace CdkStack.Helpers
     }
 
     public class StaticSiteOnS3WithCloudFront : Construct
-    {        
+    {
         public StaticSiteOnS3WithCloudFront(Construct scope, string id, StaticSiteConstructProps props) : base(scope, id)
         {
             var zone = HostedZone.FromLookup(this, "Zone", new HostedZoneProviderProps
             {
-
                 DomainName = props.DomainName
             });
 
-            var siteDomain = (string)($"{props.SiteSubDomain}.{props.DomainName}");
-            new CfnOutput(this, "Site", new CfnOutputProps
-            {
-                Value = $"https://{siteDomain}"
-            });
+            var siteDomain = $"{props.SiteSubDomain}.{props.DomainName}";
 
             var siteBucket = new Bucket(this, "SiteBucket", new BucketProps
             {
@@ -44,37 +39,25 @@ namespace CdkStack.Helpers
                 WebsiteIndexDocument = props.WebsiteIndexDocument,
                 WebsiteErrorDocument = "error.html",
                 PublicReadAccess = true,
-
-                // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
-                // the new bucket, and it will remain in your account until manually deleted. By setting the policy to
-                // DESTROY, cdk destroy will attempt to delete the bucket, but will error if the bucket is not empty.
-                RemovalPolicy = RemovalPolicy.DESTROY // NOT recommended for production code
+                RemovalPolicy = RemovalPolicy.RETAIN
             });
 
-            new CfnOutput(this, "Bucket", new CfnOutputProps
-            {
-                Value = siteBucket.BucketName
-            });
-
-            var certificateArn = new DnsValidatedCertificate(this, "SiteCertificate", new DnsValidatedCertificateProps
+            var certificate = new DnsValidatedCertificate(this, "SiteCertificate", new DnsValidatedCertificateProps
             {
                 DomainName = siteDomain,
-                HostedZone = zone
-            }).CertificateArn;
-
-            new CfnOutput(this, "Certificate", new CfnOutputProps { Value = certificateArn });
-
-            var behavior = new Behavior();
-            behavior.IsDefaultBehavior = true;
+                HostedZone = zone,
+                Region = "us-east-1" // Cloudfront only checks this region for certificates.
+            });
 
             var distribution = new CloudFrontWebDistribution(this, "SiteDistribution", new CloudFrontWebDistributionProps
-            {
-                AliasConfiguration = new AliasConfiguration
+            {                
+                AliasConfiguration = new AliasConfiguration()
                 {
-                    AcmCertRef = certificateArn,
                     Names = new string[] { siteDomain },
-                    SslMethod = SSLMethod.SNI
+                    AcmCertRef = certificate.CertificateArn, 
+                    SecurityPolicy = SecurityPolicyProtocol.TLS_V1_2_2019
                 },
+                //ViewerCertificate = ViewerCertificate.FromAcmCertificate(certificate), // this syntax doesn't seem to be quite ready for use yet
                 OriginConfigs = new ISourceConfiguration[]
                 {
                     new SourceConfiguration
@@ -83,14 +66,9 @@ namespace CdkStack.Helpers
                         {
                             S3BucketSource = siteBucket
                         },
-                        Behaviors = new Behavior[] {behavior}
+                        Behaviors = new Behavior[] { new Behavior() { IsDefaultBehavior = true } }
                     }
                 }
-            });
-
-            new CfnOutput(this, "DistributionId", new CfnOutputProps
-            {
-                Value = distribution.DistributionId
             });
 
             new ARecord(this, "SiteAliasRecord", new ARecordProps
@@ -107,6 +85,18 @@ namespace CdkStack.Helpers
                 Distribution = distribution,
                 DistributionPaths = new string[] { "/*" }
             });
+
+            Log("Site", $"https://{siteDomain}");
+
+            Log("StaticWebsiteBucket", siteBucket.BucketName);
+
+            void Log(string key, string value)
+            {
+                new CfnOutput(this, key, new CfnOutputProps
+                {
+                    Value = value
+                });
+            }
         }
     }
 }
