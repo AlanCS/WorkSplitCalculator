@@ -1,11 +1,9 @@
 ﻿using Amazon.CDK;
+using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.Route53;
+using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Deployment;
-using Amazon.CDK.AWS.CertificateManager;
-using Amazon.CDK.AWS.CloudFront;
-using System.Linq;
-using Amazon.CDK.AWS.Route53.Targets;
 
 namespace WorkSplitCdkStacks.Helpers
 {
@@ -19,34 +17,31 @@ namespace WorkSplitCdkStacks.Helpers
 
         public string WebsiteIndexDocument = "index.html";
 
-        public string WebsiteFilesPath = "";
+        public string WebsiteFilesPath;
+
+        public string CertificateArn;
     }
 
     public class StaticSiteOnS3WithCloudFront : Construct
     {
-        public StaticSiteOnS3WithCloudFront(Construct scope, string id, StaticSiteConstructProps props) : base(scope, id)
+        public StaticSiteOnS3WithCloudFront(Stack scope, string id, StaticSiteConstructProps props) : base(scope, id)
         {
-            var zone = HostedZone.FromLookup(this, "Zone", new HostedZoneProviderProps
-            {
-                DomainName = props.DomainName
-            });
+            // domain and certificate have been created manually on AWS Console for security purposes
 
             var siteDomain = $"{props.SiteSubDomain}.{props.DomainName}";
 
             var siteBucket = new Bucket(this, "SiteBucket", new BucketProps
             {
-                BucketName = siteDomain,
+                BucketName = $"static-content-{siteDomain}",
                 WebsiteIndexDocument = props.WebsiteIndexDocument,
                 WebsiteErrorDocument = "error.html",
                 PublicReadAccess = true,
-                RemovalPolicy = RemovalPolicy.RETAIN
+                RemovalPolicy = RemovalPolicy.DESTROY
             });
 
-            var certificate = new DnsValidatedCertificate(this, "SiteCertificate", new DnsValidatedCertificateProps
+            var zone = HostedZone.FromLookup(this, "Zone", new HostedZoneProviderProps
             {
-                DomainName = siteDomain,
-                HostedZone = zone,
-                Region = "us-east-1" // Cloudfront only checks this region for certificates.
+                DomainName = props.DomainName
             });
 
             var distribution = new CloudFrontWebDistribution(this, "SiteDistribution", new CloudFrontWebDistributionProps
@@ -54,7 +49,7 @@ namespace WorkSplitCdkStacks.Helpers
                 AliasConfiguration = new AliasConfiguration()
                 {
                     Names = new string[] { siteDomain },
-                    AcmCertRef = certificate.CertificateArn, 
+                    AcmCertRef = props.CertificateArn, 
                     SecurityPolicy = SecurityPolicyProtocol.TLS_V1_2_2019
                 },
                 //ViewerCertificate = ViewerCertificate.FromAcmCertificate(certificate), // this syntax doesn't seem to be quite ready for use yet
@@ -86,17 +81,9 @@ namespace WorkSplitCdkStacks.Helpers
                 DistributionPaths = new string[] { "/*" }
             });
 
-            Log("Site", $"https://{siteDomain}");
+            scope.Log("CloudFrontSite", $"https://{siteDomain}");
 
-            Log("StaticWebsiteBucket", siteBucket.BucketName);
-
-            void Log(string key, string value)
-            {
-                new CfnOutput(this, key, new CfnOutputProps
-                {
-                    Value = value
-                });
-            }
+            scope.Log("StaticWebsiteBucket", siteBucket.BucketName);
         }
     }
 }

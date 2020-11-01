@@ -1,8 +1,9 @@
 using Amazon.CDK;
-using Amazon.CDK.AWS.APIGateway;
+using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.Lambda;
-using WorkSplitCdkStacks.Helpers;
+using Amazon.CDK.AWS.Route53;
 using System;
+using WorkSplitCdkStacks.Helpers;
 
 namespace WorkSplitCdkStacks
 {
@@ -11,26 +12,48 @@ namespace WorkSplitCdkStacks
         internal InfrastructureStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
             var stackIdentifier = $"stack [{StackName}] for region [{Region}] and account [{Account}]";
+
             Console.WriteLine($"Starting stack {stackIdentifier}");
 
-            var dotnetWebApiLambda = new Function(this, "WebLambda", new FunctionProps
+            // this script suposes the domain been registered manually in AWS
+
+            var baseDomainName = "alancardozosarli.com";
+            var apiDomainName = $"api.{baseDomainName}";
+
+            var zone = HostedZone.FromLookup(this, "Zone", new HostedZoneProviderProps
             {
-                Runtime = Runtime.DOTNET_CORE_3_1,
-                Code = Code.FromAsset("temp/Web"),
-                Handler = "Web::Web.LambdaEntryPoint::FunctionHandlerAsync"
+                DomainName = baseDomainName
             });
 
-            var apiGetway = new LambdaRestApi(this, "ApiGetwayLambda", new LambdaRestApiProps()
+            var backend = new DotNetLambdaWithApiGetway(this, "Backend", new DotNetLambdaWithApiGetwayProps
             {
-                Handler = dotnetWebApiLambda
+                Domain = apiDomainName,
+                Code = Code.FromAsset("temp/Web"),
+                Certificate = CreateCertificate(true),
+                Zone = zone
             });
+
 
             var frontEnd = new StaticSiteOnS3WithCloudFront(this, "MyStaticSite", new StaticSiteConstructProps
             {
-                DomainName = "alancardozosarli.com",
+                DomainName = baseDomainName,
                 SiteSubDomain = "www",
-                WebsiteFilesPath = "temp/Client/wwwroot"
-            });
+                WebsiteFilesPath = "temp/Client/wwwroot",
+                CertificateArn = CreateCertificate(false).CertificateArn
+            });            
+
+            DnsValidatedCertificate CreateCertificate(bool isSubDomain)
+            {
+                var certificate = new DnsValidatedCertificate(this, "SiteCertificate_" + (isSubDomain ? "subDomain" : "mainDomain"), new DnsValidatedCertificateProps
+                {
+                    DomainName = isSubDomain ? $"*.{baseDomainName}" : $"www.{baseDomainName}",
+                    HostedZone = zone,
+                    Region = "us-east-1" // Cloudfront only checks this region for certificates.
+                });
+
+                return certificate;
+            }
+
             Console.WriteLine($"Completed stack {stackIdentifier}");
         }
     }
