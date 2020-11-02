@@ -1,0 +1,1 @@
+This is a purchased template (https://themeforest.net/item/bookcard-responsive-3d-folded-vcard/4285225) and adapted

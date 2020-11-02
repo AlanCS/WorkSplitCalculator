@@ -1,4 +1,5 @@
 ﻿using Amazon.CDK;
+using System;
 
 namespace CloudConfiguration.Helpers
 {
@@ -10,6 +11,12 @@ namespace CloudConfiguration.Helpers
             {
                 Value = value
             });
+        }
+
+        public static void LogCompletion(this Stack scope)
+        {
+            var stackIdentifier = $"[{scope.StackName}] for region [{scope.Region}] and account [{scope.Account}]";
+            Console.WriteLine($"Completed stack {stackIdentifier}");
         }
     }
 }

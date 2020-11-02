@@ -11,9 +11,11 @@ namespace CloudConfiguration.Helpers
     {
         public Code Code;
 
-        public string Domain;
+        public string DomainName;
 
-        public DnsValidatedCertificate Certificate;
+        public string SiteSubDomain;
+
+        public ICertificate Certificate;
 
         public IHostedZone Zone;
     }
@@ -36,9 +38,11 @@ namespace CloudConfiguration.Helpers
                 Handler = dotnetWebApiLambda
             });
 
-            var apiDomain = apiGetway.AddDomainName(props.Domain, new DomainNameOptions()
+            var fullDomain = $"{props.SiteSubDomain}.{props.DomainName}";
+
+            var apiDomain = apiGetway.AddDomainName(fullDomain, new DomainNameOptions()
             {
-                DomainName = props.Domain,
+                DomainName = fullDomain,
                 Certificate = props.Certificate,
                 EndpointType = EndpointType.EDGE
             });
