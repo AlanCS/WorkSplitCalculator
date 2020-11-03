@@ -15,9 +15,13 @@ namespace Boilerplate.Infrastructure.Extensions
     public static class IEndpointRouteBuilderExtensions
     {
         private static string EnvName;
+
+        private static AssemblyName assembly;
+
         public static void AddCustomHealthCheck(this IEndpointRouteBuilder endpoint, IWebHostEnvironment env)
         {
             EnvName = env.EnvironmentName;
+            assembly = Assembly.GetCallingAssembly().GetName();
 
             endpoint.MapHealthChecks("/healthcheck", new HealthCheckOptions()
             {
@@ -47,13 +51,11 @@ namespace Boilerplate.Infrastructure.Extensions
             {
                 using (var writer = new Utf8JsonWriter(stream, options))
                 {
-                    var assembly = Assembly.GetEntryAssembly().GetName();
-
                     writer.WriteStartObject();
                     writer.WriteString("name", assembly.Name);
-                    writer.WriteString("environment", EnvName);
-                    writer.WriteString("status", result.Status.ToString());
                     writer.WriteString("version", assembly.Version.ToString()); // this allows us to check if new versions were really deployed
+                    writer.WriteString("environment", EnvName);
+                    writer.WriteString("status", result.Status.ToString());                    
                     writer.WriteString("date", System.DateTime.Now.ToString("s"));
                     writer.WriteStartObject("results");
                     foreach (var entry in result.Entries)

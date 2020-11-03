@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Web
 {
@@ -44,6 +45,7 @@ namespace Web
         /// <param name="builder"></param>
         protected override void Init(IHostBuilder builder)
         {
+            
         }
     }
 }

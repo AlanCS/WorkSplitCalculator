@@ -1,15 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace AWSServerless1.Controllers
 {
-    [Route("api/WorkSplit")]
+    [Route("WorkSplit")]
     public class WorkSplitController : ControllerBase
     {
-        // GET api/values/5
+        private readonly ILogger<WorkSplitController> logger;
+
+        public WorkSplitController(ILogger<WorkSplitController> logger)
+        {
+            this.logger = logger;
+        }
+        
         [HttpGet("{value}")]
         public string Get(string value)
         {
-            return value.ToUpper();
+            logger.LogInformation(value);
+
+            return value.ToUpper();            
         }
     }
 }
