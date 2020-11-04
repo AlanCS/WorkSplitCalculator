@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -29,18 +31,26 @@ namespace Boilerplate.Infrastructure.Extensions
             });
         }
 
-        /// <summary>
-
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
         private static Task WriteResponse(HttpContext context, HealthReport result)
         {
             // copied from https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-3.1
             // then adapted to add app name and version
 
             context.Response.ContentType = "application/json; charset=utf-8";
+
+            string json = CreateReportJson(result);
+
+            return context.Response.WriteAsync(json);
+        }
+
+
+        private static DateTime DateCached = DateTime.Now.AddDays(-1);
+        private static string Cache = "";
+
+        private static string CreateReportJson(HealthReport result)
+        {
+            if (DateCached >= DateTime.Now.AddMinutes(-5))
+                return Cache;
 
             var options = new JsonWriterOptions
             {
@@ -55,33 +65,40 @@ namespace Boilerplate.Infrastructure.Extensions
                     writer.WriteString("name", assembly.Name);
                     writer.WriteString("version", assembly.Version.ToString()); // this allows us to check if new versions were really deployed
                     writer.WriteString("environment", EnvName);
-                    writer.WriteString("status", result.Status.ToString());                    
-                    writer.WriteString("date", System.DateTime.Now.ToString("s"));
-                    writer.WriteStartObject("results");
-                    foreach (var entry in result.Entries)
+                    writer.WriteString("status", result.Status.ToString());
+                    writer.WriteString("date", DateTime.Now.ToString("s") + " " + TimeZone.CurrentTimeZone.StandardName);
+
+                    if (result.Entries.Any())
                     {
-                        writer.WriteStartObject(entry.Key);
-                        writer.WriteString("status", entry.Value.Status.ToString());
-                        writer.WriteString("description", entry.Value.Description);
-                        writer.WriteStartObject("data");
-                        foreach (var item in entry.Value.Data)
+                        writer.WriteStartObject("results");
+                        foreach (var entry in result.Entries)
                         {
-                            writer.WritePropertyName(item.Key);
-                            JsonSerializer.Serialize(
-                                writer, item.Value, item.Value?.GetType() ??
-                                typeof(object));
+                            writer.WriteStartObject(entry.Key);
+                            writer.WriteString("status", entry.Value.Status.ToString());
+                            writer.WriteString("description", entry.Value.Description);
+                            writer.WriteStartObject("data");
+                            foreach (var item in entry.Value.Data)
+                            {
+                                writer.WritePropertyName(item.Key);
+                                JsonSerializer.Serialize(
+                                    writer, item.Value, item.Value?.GetType() ??
+                                    typeof(object));
+                            }
+                            writer.WriteEndObject();
+                            writer.WriteEndObject();
                         }
                         writer.WriteEndObject();
-                        writer.WriteEndObject();
                     }
-                    writer.WriteEndObject();
+
                     writer.WriteEndObject();
                 }
 
-                var json = Encoding.UTF8.GetString(stream.ToArray());
-
-                return context.Response.WriteAsync(json);
+                Cache = Encoding.UTF8.GetString(stream.ToArray());
             }
+
+            DateCached = DateTime.Now;
+
+            return Cache;
         }
     }
 }

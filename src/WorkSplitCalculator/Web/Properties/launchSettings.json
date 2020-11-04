@@ -13,6 +13,8 @@
       "launchBrowser": true,
       "launchUrl": "WorkSplit/alan%20sarli",
       "environmentVariables": {
+        "SnsTopic": "arn:aws:sns:ap-southeast-2:249226:work-split-requests",
+        "Region": "ap-southeast-2",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

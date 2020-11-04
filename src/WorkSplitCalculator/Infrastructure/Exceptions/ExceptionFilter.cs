@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Boilerplate.Infrastructure.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Boilerplate.Infrastructure.Exceptions
+namespace Infrastructure
 {
     public class ExceptionFilter
     {
@@ -30,14 +31,13 @@ namespace Boilerplate.Infrastructure.Exceptions
                 var result = HandleError(ex);
                 context.Response.StatusCode = (int)result.code;
 
-                await context.Response.WriteAsync(JsonSerializer.Serialize(result));
+                await context.Response.WriteAsync(JsonSerializer.Serialize(result.response));
             }
         }
 
         internal (ErrorResponse response, HttpStatusCode code) HandleError(Exception exception)
         {
             HttpStatusCode code = HttpStatusCode.InternalServerError;
-            string message = Messages.DefaultErrorMessage; // we hide the real reason for the exception, to not help hackers; but could be different approach if internal api
 
             switch (exception)
             {
@@ -50,7 +50,7 @@ namespace Boilerplate.Infrastructure.Exceptions
                     break;
             }
 
-            return (new ErrorResponse() { Message = message }, code);
+            return (new ErrorResponse() { Message = exception.Message }, code);
         }
     }
 }

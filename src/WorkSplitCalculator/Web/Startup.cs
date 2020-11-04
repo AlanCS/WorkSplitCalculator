@@ -1,12 +1,11 @@
+using BizCover.Api.Cars.Infrastructure;
 using Boilerplate.Infrastructure.Extensions;
+using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Web
 {
@@ -18,9 +17,11 @@ namespace Web
             services.AddLogging();
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 
-            services.AddControllers();
+            services
+                .AddControllers();
 
             services
+                .ThrowBadRequestOnBadModelValidation()
                 .AddHealthChecks();
 
             // Add S3 to the ASP.NET Core dependency injection framework.
@@ -30,10 +31,7 @@ namespace Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseMiddleware<ExceptionFilter>();
 
             app.UseRewriter(new RewriteOptions().AddRewrite("^$", "healthcheck", true));
 

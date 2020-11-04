@@ -15,6 +15,8 @@
     <PackageReference Include="Amazon.CDK.AWS.Route53.Targets" Version="1.71.0" />
     <PackageReference Include="Amazon.CDK.AWS.S3" Version="1.71.0" />
     <PackageReference Include="Amazon.CDK.AWS.S3.Deployment" Version="1.71.0" />
+    <PackageReference Include="Amazon.CDK.AWS.SNS" Version="1.71.0" />
+    <PackageReference Include="Amazon.CDK.AWS.SNS.Subscriptions" Version="1.71.0" />
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="1.14.0" PrivateAssets="all" />
   </ItemGroup>
 

@@ -1,8 +1,11 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.CertificateManager;
+using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Route53;
+using Amazon.CDK.AWS.SNS;
+using Amazon.CDK.AWS.SNS.Subscriptions;
 
 namespace CloudConfiguration.Helpers
 {
@@ -26,12 +29,23 @@ namespace CloudConfiguration.Helpers
         {
             // domain and certificate have been created manually on AWS Console for security purposes
 
+            var snsTopic = new Topic(this, "WorkSplitRequest", new TopicProps()
+            {
+                TopicName = "work-split-request",
+                DisplayName = "Work Split Request"
+            });
+
+            snsTopic.AddSubscription(new EmailSubscription("alanzis@gmail.com", new EmailSubscriptionProps()));
+
             var dotnetWebApiLambda = new Function(this, "WebLambda", new FunctionProps
             {
                 Runtime = Runtime.DOTNET_CORE_3_1,
                 Code = props.Code,
                 Handler = "Web::Web.LambdaEntryPoint::FunctionHandlerAsync"
             });
+            dotnetWebApiLambda.AddEnvironment("Region", scope.Region);
+            dotnetWebApiLambda.AddEnvironment("SnsTopic", snsTopic.TopicArn);
+            snsTopic.GrantPublish(dotnetWebApiLambda);
 
             var apiGetway = new LambdaRestApi(this, "ApiGetwayLambda", new LambdaRestApiProps()
             {
