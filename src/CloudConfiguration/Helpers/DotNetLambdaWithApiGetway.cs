@@ -4,8 +4,10 @@ using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Route53;
+using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.SNS;
 using Amazon.CDK.AWS.SNS.Subscriptions;
+using Amazon.CDK.AWS.SQS;
 
 namespace CloudConfiguration.Helpers
 {
@@ -37,6 +39,10 @@ namespace CloudConfiguration.Helpers
 
             snsTopic.AddSubscription(new EmailSubscription("alanzis@gmail.com", new EmailSubscriptionProps()));
 
+            var queue = new Queue(this, "QueueProcessor", new QueueProps() { RetentionPeriod = Duration.Days(2) });
+
+            snsTopic.AddSubscription(new SqsSubscription(queue));
+
             var dotnetWebApiLambda = new Function(this, "WebLambda", new FunctionProps
             {
                 Runtime = Runtime.DOTNET_CORE_3_1,
@@ -47,26 +53,27 @@ namespace CloudConfiguration.Helpers
             dotnetWebApiLambda.AddEnvironment("SnsTopic", snsTopic.TopicArn);
             snsTopic.GrantPublish(dotnetWebApiLambda);
 
-            var apiGetway = new LambdaRestApi(this, "ApiGetwayLambda", new LambdaRestApiProps()
-            {
-                Handler = dotnetWebApiLambda
-            });
-
             var fullDomain = $"{props.SiteSubDomain}.{props.DomainName}";
 
-            var apiDomain = apiGetway.AddDomainName(fullDomain, new DomainNameOptions()
+            var apiGetway = new LambdaRestApi(this, fullDomain, new LambdaRestApiProps()
+            {
+                Handler = dotnetWebApiLambda
+            });            
+
+            var apiDomain = apiGetway.AddDomainName("customDomain", new DomainNameOptions()
             {
                 DomainName = fullDomain,
                 Certificate = props.Certificate,
+                SecurityPolicy = SecurityPolicy.TLS_1_2,
                 EndpointType = EndpointType.EDGE
             });
 
-            new CnameRecord(this, "ApiGatewayRecordSet", new CnameRecordProps()
-            {
+            new ARecord(this, "ApiGateway-ARecord", new ARecordProps() {
                 Zone = props.Zone,
-                RecordName = "api",
-                DomainName = apiDomain.DomainNameAliasDomainName
+                RecordName = fullDomain,
+                Target = RecordTarget.FromAlias(new ApiGateway(apiGetway)),
             });
+
 
             scope.Log($"ApiGateway Url {id}", apiGetway.Url);
             scope.Log($"ApiGateway public domain {id}", apiDomain.DomainNameAliasDomainName);

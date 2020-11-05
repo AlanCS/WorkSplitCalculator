@@ -1,5 +1,6 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.CloudFront;
+using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Route53;
 using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
@@ -39,23 +40,28 @@ namespace CloudConfiguration.Helpers
                 RemovalPolicy = RemovalPolicy.DESTROY
             });
 
+
             var distribution = new CloudFrontWebDistribution(this, $"SiteDistribution_{id}", new CloudFrontWebDistributionProps
-            {                
+            {
                 AliasConfiguration = new AliasConfiguration()
                 {
                     Names = new string[] { fullDomain },
-                    AcmCertRef = props.CertificateArn, 
+                    AcmCertRef = props.CertificateArn,
                     SecurityPolicy = SecurityPolicyProtocol.TLS_V1_2_2019
                 },
+
                 //ViewerCertificate = ViewerCertificate.FromAcmCertificate(certificate), // this syntax doesn't seem to be quite ready for use yet
                 OriginConfigs = new ISourceConfiguration[]
                 {
                     new SourceConfiguration
                     {
                         S3OriginSource = new S3OriginConfig { S3BucketSource = siteBucket },
-                        Behaviors = new Behavior[] { new Behavior() { IsDefaultBehavior = true } }
+                        Behaviors = new Behavior[] { new Behavior() {
+                            IsDefaultBehavior = true
+                        }
                     }
                 }
+            }
             });
 
             new ARecord(this, $"SiteAliasRecord_{id}", new ARecordProps

@@ -8,13 +8,11 @@ namespace CloudConfiguration
 {
     public class WorkSplitCalculatorStack : Stack
     {
-        static Dictionary<bool, DnsValidatedCertificate>  certsCache = new Dictionary<bool, DnsValidatedCertificate>();
-
         internal WorkSplitCalculatorStack(Construct scope, string id, string baseDomainName, DTO.NetworkConfig config, IStackProps props = null) : base(scope, id, props)
         {
             var WorkSplitCalculatorBackend = new DotNetLambdaWithApiGetway(this, "WorkSplitCalculatorBackend", new DotNetLambdaWithApiGetwayProps
             {
-                SiteSubDomain = "worksplitcalculator-api",
+                SiteSubDomain = "worksplitcalculatorapi",
                 DomainName = baseDomainName,
                 Code = Code.FromAsset("published/WorkSplitCalculator/Web"),
                 Certificate = config.Certificate,
